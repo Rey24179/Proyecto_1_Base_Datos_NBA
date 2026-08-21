@@ -10,28 +10,6 @@ de datos PostgreSQL utilizando los CSV proporcionados y una ingesta desde NBA AP
 - Git
 - Docker Desktop, opcional
 
-## Estructura
-
-```text
-proyecto_nba_etapa1/
-├── data/                       # Aquí se coloca Data.zip
-├── database/
-│   ├── schema.sql              # Creación del modelo
-│   ├── verification.sql        # Comprobaciones de calidad
-│   ├── analysis_queries.sql     # 15 consultas requeridas
-│   └── preview_queries.sql      # Consultas preliminares heredadas
-├── diagrams/
-│   └── modelo_er.md             # Diagrama Mermaid
-├── scripts/
-│   ├── db.py                    # Conexión a PostgreSQL
-│   ├── load_csv.py              # Limpieza y carga de CSV
-│   └── load_api.py              # Ingesta desde NBA API
-├── .env.example
-├── docker-compose.yml
-├── requirements.txt
-└── AVANCES_ETAPA_1.md
-```
-
 ## Instalación rápida en Windows
 
 ### 1. Crear el entorno virtual
