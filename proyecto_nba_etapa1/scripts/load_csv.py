@@ -184,8 +184,11 @@ def main(zip_path, reset, dry_run=False):
             ))
 
         officials_source["OFFICIAL_ID"] = officials_source["OFFICIAL_ID"].map(integer)
-        official_values = [tuple(row) for row in officials_source.drop_duplicates("OFFICIAL_ID")
-                           [["OFFICIAL_ID", "FIRST_NAME", "LAST_NAME", "JERSEY_NUM"]].itertuples(index=False, name=None)]
+        official_values = [(
+            integer(record["OFFICIAL_ID"]), text(record["FIRST_NAME"]),
+            text(record["LAST_NAME"]), text(record["JERSEY_NUM"])
+        ) for record in officials_source.drop_duplicates("OFFICIAL_ID").to_dict("records")
+           if integer(record["OFFICIAL_ID"]) is not None]
         valid_game_ids = {value[0] for value in game_values}
         game_official_values = []
         for record in officials_source.to_dict("records"):

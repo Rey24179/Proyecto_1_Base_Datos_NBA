@@ -53,3 +53,13 @@ Las tablas principales son: `team`, `season`, `player`, `game`, `official`,
   `player_season_stat`.
 - Agregar el diagrama ER exportado como imagen al repositorio.
 
+## Auditoría contra el enunciado completo
+
+- Se agregó `database/analysis_queries.sql` con las 8 preguntas obligatorias y
+  7 consultas propias, para un total de 15.
+- Se añadieron controles de cobertura de temporadas y coherencia de resultados.
+- La ingesta API ahora crea o actualiza temporadas, equipos y jugadores nuevos,
+  lo que permite intentar la ampliación a 2025-26 sin violar llaves foráneas.
+- Se agregó `documentation/INFORME_FINAL.md` como guía para documentar resultados
+  reales sin inventar cifras.
+

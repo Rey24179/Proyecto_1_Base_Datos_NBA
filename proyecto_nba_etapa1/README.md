@@ -5,7 +5,7 @@ de datos PostgreSQL utilizando los CSV proporcionados y una ingesta desde NBA AP
 
 ## Requisitos
 
-- Python 3.11 o superior
+- Python 3.11 a 3.13 (las dependencias fijadas no son compatibles con Python 3.14)
 - PostgreSQL 15 o superior
 - Git
 - Docker Desktop, opcional
@@ -18,7 +18,8 @@ proyecto_nba_etapa1/
 ├── database/
 │   ├── schema.sql              # Creación del modelo
 │   ├── verification.sql        # Comprobaciones de calidad
-│   └── preview_queries.sql      # Consultas preliminares
+│   ├── analysis_queries.sql     # 15 consultas requeridas
+│   └── preview_queries.sql      # Consultas preliminares heredadas
 ├── diagrams/
 │   └── modelo_er.md             # Diagrama Mermaid
 ├── scripts/
@@ -81,10 +82,14 @@ python scripts/load_csv.py --zip data/Data.zip
 Este comando vuelve a crear las tablas. Para ejecutar una carga sin reconstruir
 el esquema use `--no-reset` solamente cuando sea necesario.
 
-### 6. Verificar la carga
+### 6. Verificar la carga y ejecutar el análisis
 
 Abra `database/verification.sql` en pgAdmin y ejecute sus consultas. Las
 consultas de duplicados y registros huérfanos deben devolver cero filas.
+
+Después ejecute `database/analysis_queries.sql`. Contiene las 8 preguntas
+obligatorias y 7 preguntas propias (15 consultas en total), incluyendo
+agrupaciones, joins y subconsultas.
 
 ### 7. Ejecutar la ingesta de NBA API
 
@@ -94,6 +99,9 @@ python scripts/load_api.py --season 2020-21
 
 La información se guarda en `player_season_stat`. El script puede repetirse sin
 duplicar registros porque utiliza una actualización mediante `ON CONFLICT`.
+
+La consulta 7 utiliza esta ingesta. Si el API no responde durante la
+demostración, documente el intento y conserve evidencia de una ejecución previa.
 
 ## Modelo de datos
 
@@ -116,6 +124,17 @@ importantes son:
   mediante el nombre normalizado y conserva el nombre cuando existe ambigüedad.
 - Se excluye inicialmente `News.csv` por tamaño y baja relevancia para las
   consultas obligatorias.
+
+## Lista de entrega
+
+- `database/schema.sql`: creación reproducible de la base.
+- `scripts/load_csv.py`: limpieza y carga de CSV.
+- `scripts/load_api.py`: ingesta oficial del NBA API.
+- `database/verification.sql`: controles de integridad y cobertura.
+- `database/analysis_queries.sql`: las 15 consultas requeridas.
+- `diagrams/modelo_er.md`: fuente del diagrama; expórtela a PNG o SVG.
+- PDF final con preguntas, SQL, resultados reales, problemas de calidad y
+  justificación de la recomendación de inversión.
 
 ## Flujo de trabajo colaborativo
 

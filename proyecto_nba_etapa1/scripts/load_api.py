@@ -1,4 +1,5 @@
 import argparse
+import math
 
 from nba_api.stats.endpoints import leaguedashplayerstats
 from psycopg2.extras import execute_values
@@ -7,7 +8,9 @@ from db import connect
 
 
 def clean(value):
-    return None if value is None else value
+    if value is None or (isinstance(value, float) and math.isnan(value)):
+        return None
+    return value
 
 
 def load_season(season):
@@ -20,11 +23,18 @@ def load_season(season):
     data = response.get_data_frames()[0]
 
     rows = []
+    teams = {}
+    players = {}
     for record in data.to_dict("records"):
         if int(record["TEAM_ID"]) == 0:
             continue
+        team_id = int(record["TEAM_ID"])
+        player_id = int(record["PLAYER_ID"])
+        teams[team_id] = (team_id, record.get("TEAM_NAME") or record.get("TEAM_ABBREVIATION") or "Equipo NBA",
+                          record.get("TEAM_ABBREVIATION"))
+        players[player_id] = (player_id, record.get("PLAYER_NAME") or f"Jugador {player_id}", team_id)
         rows.append((
-            int(record["PLAYER_ID"]), int(record["TEAM_ID"]), season,
+            player_id, team_id, season,
             clean(record.get("GP")), clean(record.get("MIN")), clean(record.get("PTS")),
             clean(record.get("AST")), clean(record.get("REB")), clean(record.get("STL")),
             clean(record.get("BLK")), clean(record.get("TOV")), clean(record.get("FG_PCT")),
@@ -52,8 +62,25 @@ def load_season(season):
             ft_pct = EXCLUDED.ft_pct,
             loaded_at = CURRENT_TIMESTAMP
     """
+    start_year = int(season[:4])
     with connect() as connection:
         with connection.cursor() as cursor:
+            # La API puede contener jugadores/equipos posteriores a los CSV de 2021.
+            execute_values(cursor, """
+                INSERT INTO team (team_id, full_name, abbreviation)
+                VALUES %s ON CONFLICT (team_id) DO UPDATE SET
+                    full_name=EXCLUDED.full_name, abbreviation=EXCLUDED.abbreviation
+            """, list(teams.values()))
+            cursor.execute("""
+                INSERT INTO season (season_id,start_year,end_year) VALUES (%s,%s,%s)
+                ON CONFLICT (season_id) DO NOTHING
+            """, (season, start_year, start_year + 1))
+            execute_values(cursor, """
+                INSERT INTO player (player_id,full_name,current_team_id,is_active)
+                VALUES %s ON CONFLICT (player_id) DO UPDATE SET
+                    full_name=EXCLUDED.full_name, current_team_id=EXCLUDED.current_team_id,
+                    is_active=TRUE
+            """, [(p[0], p[1], p[2], True) for p in players.values()])
             execute_values(cursor, sql, rows, page_size=1000)
     print(f"NBA API: {len(rows)} estadísticas cargadas para {season}.")
 
