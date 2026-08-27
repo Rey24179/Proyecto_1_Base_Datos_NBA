@@ -6,9 +6,8 @@ de datos PostgreSQL utilizando los CSV proporcionados y una ingesta desde NBA AP
 ## Requisitos
 
 - Python 3.11 a 3.13 (las dependencias fijadas no son compatibles con Python 3.14)
-- PostgreSQL 15 o superior
+- PostgreSQL 15 o superior instalado localmente
 - Git
-- Docker Desktop, opcional
 
 ## Instalación rápida en Windows
 
@@ -29,15 +28,11 @@ No suba `.env` a GitHub.
 Copy-Item .env.example .env
 ```
 
-### 3. Iniciar PostgreSQL
+### 3. Preparar PostgreSQL local
 
-Opción A: crear manualmente una base llamada `nba_project` desde pgAdmin.
-
-Opción B: utilizar Docker:
-
-```powershell
-docker compose up -d
-```
+Inicie el servicio local de PostgreSQL y cree una base llamada `nba_project`
+desde pgAdmin. Compruebe que los datos de acceso coincidan con los valores de
+su archivo `.env`.
 
 ### 4. Colocar los datos
 
@@ -45,7 +40,8 @@ Copie el ZIP entregado en Canvas a `data/Data.zip`. No es necesario descomprimir
 
 ### 5. Crear las tablas y cargar los CSV
 
-Primero puede validar las transformaciones sin conectarse a PostgreSQL:
+Todos los comandos del proyecto se ejecutan con Python. Primero puede validar
+las transformaciones sin conectarse a PostgreSQL:
 
 ```powershell
 python scripts/load_csv.py --zip data/Data.zip --dry-run
