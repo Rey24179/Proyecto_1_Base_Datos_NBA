@@ -21,12 +21,29 @@ pip install -r requirements.txt
 
 ### 2. Configurar las variables
 
-Copie `.env.example` como `.env` y escriba la contraseña real de PostgreSQL.
-No suba `.env` a GitHub.
+Copie `.env.example` como `.env`:
 
 ```powershell
 Copy-Item .env.example .env
 ```
+
+Abra `.env` y reemplace el valor de `DB_PASSWORD` con la contraseña real del
+usuario `postgres`. Debe ser exactamente la misma contraseña utilizada para
+conectarse al servidor PostgreSQL desde pgAdmin; no deje la contraseña de
+ejemplo.
+
+```env
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=nba_project
+DB_USER=postgres
+DB_PASSWORD=SU_CONTRASEÑA_REAL_DE_POSTGRES
+NBA_SEASON=2020-21
+```
+
+Si la contraseña no coincide, `load_csv.py` no podrá conectarse y la carga
+fallará con un error de autenticación o conexión. No suba `.env` a GitHub,
+porque contiene información privada.
 
 ### 3. Preparar PostgreSQL local
 
