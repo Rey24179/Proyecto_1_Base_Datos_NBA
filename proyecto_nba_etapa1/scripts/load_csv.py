@@ -120,9 +120,12 @@ def build_players(archive, draft):
         player_id = integer(record["id"])
         known.add(player_id)
         full_name = text(record.get("full_name")) or text(record.get("display_first_last")) or "Unknown Player"
+        current_team_id = integer(record.get("team_id"))
+        if current_team_id is not None and current_team_id <= 0:
+            current_team_id = None
         values.append((
             player_id, full_name, text(record.get("first_name")), text(record.get("last_name")),
-            boolean(record.get("is_active")) or False, integer(record.get("team_id")),
+            boolean(record.get("is_active")) or False, current_team_id,
             pd.to_datetime(record.get("birthdate"), errors="coerce").date() if pd.notna(record.get("birthdate")) else None,
             text(record.get("school")), text(record.get("country")), number(record.get("height")),
             number(record.get("weight")), text(record.get("position")), text(record.get("rosterstatus")),
