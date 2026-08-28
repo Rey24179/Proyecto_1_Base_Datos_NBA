@@ -1,58 +1,228 @@
 /* 15 consultas requeridas. Temporada 2017 = 2017-18. */
 
--- 1. Jugadores activos mas alto y mas bajo (subquery).
-SELECT full_name,height_inches FROM player
-WHERE is_active AND height_inches IN
- (SELECT MAX(height_inches) FROM player WHERE is_active UNION SELECT MIN(height_inches) FROM player WHERE is_active)
-ORDER BY height_inches DESC,full_name;
+/* ===================================================================
+   ETAPA 2 - Las 8 preguntas obligatorias
+   CC3088 Base de Datos 1 - Proyecto 1
 
--- 2. Promedio anotado/recibido por equipo y temporada.
-WITH r AS (
- SELECT season_id,home_team_id team_id,home_points favor,away_points contra FROM game
- UNION ALL SELECT season_id,away_team_id,away_points,home_points FROM game)
-SELECT r.season_id,t.full_name,ROUND(AVG(favor),2) anotados,ROUND(AVG(contra),2) recibidos
-FROM r JOIN team t ON t.team_id=r.team_id WHERE LEFT(r.season_id,4)::int BETWEEN 2015 AND 2020
-GROUP BY r.season_id,t.team_id,t.full_name ORDER BY r.season_id,anotados DESC;
+   CONVENCIONES DE INTERPRETACION (documentar en el PDF):
+   - "temporada 2017" = 2017-18 ; "temporada 2018" = 2018-19
+     (se nombra la temporada por el anio en que inicia)
+   - "ultima temporada" = 2020-21, la ultima temporada COMPLETA presente
+     en Game.csv. team_salary contiene proyecciones hasta 2025-26, pero
+     esas temporadas no tienen partidos ni rosters cargados, por lo que
+     no sirven para responder preguntas de desempenio.
+   - El dataset contiene UNICAMENTE temporada regular (todos los
+     SEASON_ID inician con 2). No hay playoffs.
+   =================================================================== */
 
--- 3. Top 5 arbitros cuando pierde el visitante.
-SELECT o.official_id,CONCAT_WS(' ',o.first_name,o.last_name) arbitro,COUNT(*) juegos
-FROM game_official go JOIN official o USING(official_id) JOIN game g USING(game_id)
-WHERE g.away_result='L' GROUP BY o.official_id,o.first_name,o.last_name ORDER BY juegos DESC LIMIT 5;
 
--- 4. Nomina y jugador mejor pagado en la ultima temporada (subquery).
-SELECT ts.season_id,t.full_name,ts.total_salary,MAX(ps.salary_value) mejor_pagado,
- RANK() OVER(ORDER BY ts.total_salary DESC) ranking_nomina
-FROM team_salary ts JOIN team t USING(team_id)
-LEFT JOIN player_salary ps ON ps.team_id=ts.team_id AND ps.season_id=ts.season_id
-WHERE ts.season_id=(SELECT MAX(season_id) FROM team_salary)
-GROUP BY ts.season_id,t.team_id,t.full_name,ts.total_salary ORDER BY ranking_nomina;
 
--- 5. Temporada con mas partidos y la de mayor duracion (subqueries).
-WITH s AS (SELECT season_id,COUNT(*) partidos,MIN(game_date) inicio,MAX(game_date) fin,
- MAX(game_date)-MIN(game_date) dias FROM game GROUP BY season_id)
-SELECT * FROM s WHERE partidos=(SELECT MAX(partidos) FROM s) OR dias=(SELECT MAX(dias) FROM s)
-ORDER BY partidos DESC,dias DESC;
+-- 1. Jugador activo mas alto y mas bajo.
+WITH activos AS (
+    SELECT full_name, height_inches
+    FROM player
+    WHERE is_active AND height_inches IS NOT NULL
+)
+SELECT 'Mas alto' AS categoria, full_name, height_inches
+FROM activos
+WHERE height_inches = (SELECT MAX(height_inches) FROM activos)
+UNION ALL
+SELECT 'Mas bajo', full_name, height_inches
+FROM activos
+WHERE height_inches = (SELECT MIN(height_inches) FROM activos)
+ORDER BY categoria DESC, full_name;
 
--- 6. Mejor margen promedio en 2017-18 y 2018-19.
-WITH m AS (SELECT season_id,home_team_id team_id,home_points-away_points margen FROM game
- UNION ALL SELECT season_id,away_team_id,away_points-home_points FROM game),
-x AS (SELECT season_id,team_id,AVG(margen) promedio,
- RANK() OVER(PARTITION BY season_id ORDER BY AVG(margen) DESC) pos FROM m
- WHERE season_id IN('2017-18','2018-19') GROUP BY season_id,team_id)
-SELECT x.season_id,t.full_name,ROUND(promedio,2) margen FROM x JOIN team t USING(team_id)
-WHERE pos=1 ORDER BY x.season_id;
 
--- 7. Jugador mas valioso del draft 2018: PIE y PTS de ultima ingesta API.
-SELECT d.player_name,d.overall_pick,p.pie,s.points_per_game,s.season_id
-FROM draft_selection d JOIN player p USING(player_id)
-LEFT JOIN player_season_stat s ON s.player_id=p.player_id
- AND s.season_id=(SELECT MAX(season_id) FROM player_season_stat)
-WHERE d.draft_year=2018 ORDER BY p.pie DESC NULLS LAST,s.points_per_game DESC NULLS LAST LIMIT 1;
 
--- 8. Top 5 estados por salarios 2020-21 y 2021-22.
-SELECT t.state,SUM(ps.salary_value) salarios FROM player_salary ps JOIN team t USING(team_id)
-WHERE ps.season_id IN('2020-21','2021-22') AND t.state IS NOT NULL
-GROUP BY t.state ORDER BY salarios DESC LIMIT 5;
+-- 2. Promedio de puntos anotados y recibidos por equipo y temporada.
+
+WITH resultados AS (
+    SELECT season_id, home_team_id AS team_id, home_points AS favor, away_points AS contra
+    FROM game
+    UNION ALL
+    SELECT season_id, away_team_id, away_points, home_points
+    FROM game
+)
+SELECT r.season_id,
+       t.full_name,
+       ROUND(AVG(r.favor), 2)  AS puntos_anotados,
+       ROUND(AVG(r.contra), 2) AS puntos_recibidos,
+       ROUND(AVG(r.favor) - AVG(r.contra), 2) AS diferencial
+FROM resultados r
+JOIN team t ON t.team_id = r.team_id
+WHERE LEFT(r.season_id, 4)::int BETWEEN 2015 AND 2020
+GROUP BY r.season_id, t.team_id, t.full_name
+ORDER BY r.season_id, puntos_anotados DESC;
+
+
+-- 3. Top 5 de arbitros en cuyos juegos pierde el equipo visitante.
+SELECT o.official_id,
+       CONCAT_WS(' ', o.first_name, o.last_name) AS arbitro,
+       COUNT(*) FILTER (WHERE g.away_result = 'L') AS derrotas_visitante,
+       COUNT(*) AS partidos_arbitrados,
+       ROUND(100.0 * COUNT(*) FILTER (WHERE g.away_result = 'L') / COUNT(*), 2) AS pct_derrota_visitante
+FROM game_official go
+JOIN official o ON o.official_id = go.official_id
+JOIN game g     ON g.game_id     = go.game_id
+GROUP BY o.official_id, o.first_name, o.last_name
+ORDER BY derrotas_visitante DESC
+LIMIT 5;
+
+
+-- 4a. Equipo con la nomina mas alta en la ultima temporada, comparado con los equipos que tienen los jugadores mas valiosos.
+WITH nomina AS (
+    SELECT ts.team_id,
+           t.full_name,
+           ts.total_salary,
+           RANK() OVER (ORDER BY ts.total_salary DESC) AS rank_nomina
+    FROM team_salary ts
+    JOIN team t ON t.team_id = ts.team_id
+    WHERE ts.season_id = '2020-21'
+),
+valor AS (
+    SELECT ps.team_id,
+           MAX(ps.salary_value)      AS salario_mas_alto,
+           ROUND(AVG(p.pie), 4)      AS pie_promedio,
+           ROUND(MAX(p.pie), 4)      AS pie_estrella,
+           RANK() OVER (ORDER BY MAX(p.pie) DESC NULLS LAST) AS rank_valor
+    FROM player_salary ps
+    LEFT JOIN player p ON p.player_id = ps.player_id
+    WHERE ps.season_id = '2020-21'
+    GROUP BY ps.team_id
+)
+SELECT n.full_name,
+       n.total_salary,
+       n.rank_nomina,
+       v.salario_mas_alto,
+       v.pie_estrella,
+       v.rank_valor,
+       n.rank_nomina - v.rank_valor AS brecha
+FROM nomina n
+LEFT JOIN valor v ON v.team_id = n.team_id
+ORDER BY n.rank_nomina;
+
+-- 4b. Medida objetiva de la relacion entre gasto y talento.
+WITH n AS (
+    SELECT team_id, total_salary FROM team_salary WHERE season_id = '2020-21'
+),
+v AS (
+    SELECT ps.team_id, MAX(p.pie) AS pie_estrella
+    FROM player_salary ps
+    LEFT JOIN player p ON p.player_id = ps.player_id
+    WHERE ps.season_id = '2020-21'
+    GROUP BY ps.team_id
+)
+SELECT ROUND(CORR(n.total_salary, v.pie_estrella)::numeric, 4) AS correlacion_nomina_valor,
+       COUNT(*) AS equipos_comparados
+FROM n JOIN v ON v.team_id = n.team_id
+WHERE v.pie_estrella IS NOT NULL;
+
+
+-- 5a. Temporada con mas partidos en la historia de la NBA.
+
+WITH s AS (
+    SELECT season_id,
+           COUNT(*) AS partidos,
+           MIN(game_date) AS inicio,
+           MAX(game_date) AS fin,
+           MAX(game_date) - MIN(game_date) AS dias
+    FROM game
+    GROUP BY season_id
+)
+SELECT season_id, partidos, inicio, fin, dias
+FROM s
+WHERE partidos = (SELECT MAX(partidos) FROM s)
+ORDER BY season_id;
+
+-- 5b. Temporada que mas se prolongo en fechas.
+WITH s AS (
+    SELECT season_id,
+           COUNT(*) AS partidos,
+           MIN(game_date) AS inicio,
+           MAX(game_date) AS fin,
+           MAX(game_date) - MIN(game_date) AS dias
+    FROM game
+    GROUP BY season_id
+)
+SELECT season_id, partidos, inicio, fin, dias
+FROM s
+ORDER BY dias DESC
+LIMIT 5;
+
+
+-- 6. Equipo con mayor diferencia de puntos a favor por partido en las temporadas 2017-18 y 2018-19.
+
+WITH margenes AS (
+    SELECT season_id, home_team_id AS team_id, home_points - away_points AS margen
+    FROM game
+    UNION ALL
+    SELECT season_id, away_team_id, away_points - home_points
+    FROM game
+),
+promedios AS (
+    SELECT season_id,
+           team_id,
+           ROUND(AVG(margen), 2) AS margen_promedio,
+           COUNT(*) AS partidos,
+           RANK() OVER (PARTITION BY season_id ORDER BY AVG(margen) DESC) AS posicion
+    FROM margenes
+    WHERE season_id IN ('2017-18', '2018-19')
+    GROUP BY season_id, team_id
+)
+SELECT p.season_id, t.full_name, p.margen_promedio, p.partidos
+FROM promedios p
+JOIN team t ON t.team_id = p.team_id
+WHERE p.posicion <= 3
+ORDER BY p.season_id, p.posicion;
+
+
+
+-- 7. Jugador mas valioso del draft 2018 en la ultima temporada.
+
+SELECT d.player_name,
+       d.overall_pick,
+       t.full_name AS equipo_que_lo_selecciono,
+       p.pie       AS pie_carrera,
+       s.points_per_game,
+       s.assists_per_game,
+       s.rebounds_per_game,
+       s.season_id AS temporada_api
+FROM draft_selection d
+JOIN player p ON p.player_id = d.player_id
+LEFT JOIN team t ON t.team_id = d.team_id
+LEFT JOIN player_season_stat s
+       ON s.player_id = p.player_id
+      AND s.season_id = (SELECT MAX(season_id) FROM player_season_stat)
+WHERE d.draft_year = 2018
+ORDER BY s.points_per_game DESC NULLS LAST, p.pie DESC NULLS LAST
+LIMIT 10;
+
+
+
+--  8. Top 5 de estados que mas salarios pagaron en 2020-21 y 2021-22.
+
+WITH equipo_estado AS (
+    SELECT team_id,
+           full_name,
+           CASE
+               WHEN full_name = 'Atlanta Hawks'   THEN 'Georgia'
+               WHEN full_name = 'Toronto Raptors' THEN 'Ontario (Canada)'
+               ELSE state
+           END AS estado
+    FROM team
+    WHERE is_current
+)
+SELECT e.estado,
+       COUNT(DISTINCT e.team_id)   AS equipos,
+       SUM(ts.total_salary)        AS salarios_totales,
+       ROUND(SUM(ts.total_salary) / COUNT(DISTINCT e.team_id), 2) AS promedio_por_equipo
+FROM team_salary ts
+JOIN equipo_estado e ON e.team_id = ts.team_id
+WHERE ts.season_id IN ('2020-21', '2021-22')
+  AND e.estado IS NOT NULL
+GROUP BY e.estado
+ORDER BY salarios_totales DESC
+LIMIT 5;
 
 -- Base reutilizada por las preguntas propias 9-13 y la recomendacion 15.
 DROP VIEW IF EXISTS analysis_team_season;
