@@ -200,8 +200,16 @@ def main(zip_path, reset, dry_run=False):
                 game_official_values.append((game_id, integer(record["OFFICIAL_ID"])))
         game_official_values = list(dict.fromkeys(game_official_values))
 
-        team_by_abbr = {value[2]: value[0] for value in team_values if value[2]}
-        team_by_name = {normalized_name(value[1]): value[0] for value in team_values}
+        # Los equipos históricos comparten abreviatura con franquicias actuales
+        # (Washington Capitols y Washington Wizards son ambos "WAS"). Se indexa
+        # primero por equipo vigente para que las búsquedas nunca resuelvan
+        # hacia una franquicia desaparecida.
+        team_by_abbr = {}
+        team_by_name = {}
+        for value in sorted(team_values, key=lambda row: not row[12]):
+            if value[2]:
+                team_by_abbr.setdefault(value[2], value[0])
+            team_by_name.setdefault(normalized_name(value[1]), value[0])
         player_ids_by_name = {}
         for value in player_values:
             player_ids_by_name.setdefault(normalized_name(value[1]), []).append(value[0])
@@ -214,7 +222,11 @@ def main(zip_path, reset, dry_run=False):
         )
         for record in melted.to_dict("records"):
             sid = record["season"][1:].replace(".", "-")
-            team_id = team_by_abbr.get(text(record["slugTeam"]))
+            # Team_Salary.csv abrevia Phoenix como "PHO" mientras que Team.csv
+            # usa "PHX". El nombre completo sí coincide, por lo que se resuelve
+            # primero por nombre y solo se recurre a la abreviatura como respaldo.
+            team_id = (team_by_name.get(normalized_name(record["nameTeam"]))
+                       or team_by_abbr.get(text(record["slugTeam"])))
             if team_id and pd.notna(record["salary"]):
                 team_salary_values.append((team_id, sid, number(record["salary"]), text(record["urlTeamSalaryHoopsHype"])))
 
