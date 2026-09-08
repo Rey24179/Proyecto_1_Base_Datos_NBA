@@ -56,8 +56,10 @@ Las tablas principales son: `team`, `season`, `player`, `game`, `official`,
 - Las capturas de verificaciones y consultas se encuentran en
   `documentation/pruebas de queries.pdf`.
 
-El análisis final, la selección del equipo y la justificación de inversión
-permanecen pendientes.
+La Etapa 3 fue ejecutada y documentada. El índice compuesto recomienda a Utah
+Jazz; la evidencia está en `documentation/Fase_3_queries.pdf` y la explicación
+en `documentation/JUSTIFICACION_ETAPA_3.md`. Permanece pendiente integrar las
+etapas completas en el documento y presentación final.
 
 ## Auditoría contra el enunciado completo
 

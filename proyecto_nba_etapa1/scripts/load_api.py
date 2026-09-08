@@ -2,6 +2,7 @@ import argparse
 import math
 
 from nba_api.stats.endpoints import leaguedashplayerstats
+from nba_api.stats.static import teams as static_teams
 from psycopg2.extras import execute_values
 
 from db import connect
@@ -22,6 +23,7 @@ def load_season(season):
     )
     data = response.get_data_frames()[0]
 
+    team_catalog = {int(team["id"]): team for team in static_teams.get_teams()}
     rows = []
     teams = {}
     players = {}
@@ -30,8 +32,12 @@ def load_season(season):
             continue
         team_id = int(record["TEAM_ID"])
         player_id = int(record["PLAYER_ID"])
-        teams[team_id] = (team_id, record.get("TEAM_NAME") or record.get("TEAM_ABBREVIATION") or "Equipo NBA",
-                          record.get("TEAM_ABBREVIATION"))
+        abbreviation = record.get("TEAM_ABBREVIATION")
+        catalog_team = team_catalog.get(team_id, {})
+        full_name = (record.get("TEAM_NAME") or catalog_team.get("full_name")
+                     or f"Equipo NBA {abbreviation or team_id}")
+        teams[team_id] = (team_id, full_name,
+                          abbreviation or catalog_team.get("abbreviation"))
         players[player_id] = (player_id, record.get("PLAYER_NAME") or f"Jugador {player_id}", team_id)
         rows.append((
             player_id, team_id, season,

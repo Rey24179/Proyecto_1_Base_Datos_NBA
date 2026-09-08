@@ -49,3 +49,9 @@ SELECT season_id,COUNT(DISTINCT team_id) AS teams
 FROM team_salary WHERE season_id IN ('2020-21','2021-22')
 GROUP BY season_id ORDER BY season_id;
 
+-- Los nombres no deben haber sido reemplazados por abreviaturas durante el API.
+-- Debe devolver cero filas para los equipos actuales.
+SELECT team_id,full_name,abbreviation
+FROM team
+WHERE is_current AND full_name=abbreviation;
+

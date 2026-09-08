@@ -1,7 +1,8 @@
 # Informe final - Proyecto NBA
 
-> Complete los campos `PENDIENTE` con resultados exportados de PostgreSQL. No
-> presente cifras que no provengan de una ejecución reproducible.
+> Los resultados de la Etapa 3 fueron ejecutados en PostgreSQL y se conservan
+> en `documentation/Fase_3_queries.pdf`. Los campos pendientes corresponden a
+> la integración de la Etapa 2 y a la presentación final.
 
 ## 1. Pregunta de negocio
 
@@ -35,7 +36,7 @@ Para cada consulta de `database/analysis_queries.sql` (1 a 8), incluir:
 3. Una tabla o gráfica del resultado.
 4. Una interpretación breve y orientada al negocio.
 
-Resultados e interpretación: PENDIENTE.
+Resultados e interpretación de la Etapa 2: PENDIENTE DE INTEGRAR.
 
 ## 5. Preguntas propias
 
@@ -44,7 +45,15 @@ consistencia, diferencial de puntos, ventaja local, eficiencia salarial,
 flexibilidad financiera, crecimiento, profundidad del roster, draft,
 dependencia y sensibilidad de la recomendación.
 
-Resultados e interpretación: PENDIENTE.
+Los resultados completos y su interpretación se encuentran en
+`documentation/JUSTIFICACION_ETAPA_3.md`. Los principales hallazgos fueron:
+
+- Utah mantuvo un piso de 48.8% y un promedio de 59.5% de victorias.
+- Su diferencial promedio fue +4.45, tercero entre los equipos comparados.
+- Logró 47 victorias con 0.345 victorias por millón de dólares.
+- Presentó cuatro jugadores con al menos 15 puntos por partido y once con 40 o
+  más partidos disputados.
+- El índice compuesto colocó a Utah en primer lugar con 0.8483.
 
 ## 6. Recomendación de inversión
 
@@ -56,9 +65,16 @@ La consulta E3.12 calcula un índice reproducible con estas ponderaciones:
 
 La consulta E3.13 comprueba la sensibilidad ante ponderaciones alternativas.
 
-Equipo recomendado según el resultado: PENDIENTE.
+Equipo recomendado según el resultado: **Utah Jazz**.
 
-Justificación, riesgos y sensibilidad a las ponderaciones: PENDIENTE.
+Utah combina rendimiento sostenido, diferencial favorable, eficiencia de
+gasto y tendencia positiva. No depende de liderar una única métrica: se
+mantiene primero en los escenarios mixto, orientado a rendimiento y orientado
+a valor. Baja al cuarto puesto cuando crecimiento recibe 60% del peso.
+
+Riesgos principales: poco margen financiero, dependencia moderada de figuras
+clave y crecimiento menos acelerado que otros candidatos. Philadelphia es la
+alternativa de mayor riesgo y mayor crecimiento.
 
 ## 7. Reproducibilidad
 
@@ -76,4 +92,5 @@ Justificación, riesgos y sensibilidad a las ponderaciones: PENDIENTE.
 - El salario no equivale por sí solo al valor financiero de una franquicia.
 - Los CSV terminan en 2021; cambios posteriores requieren la actualización API.
 - PIE y estadísticas por partido son criterios deportivos, no una valoración de mercado.
-- La recomendación cambia si el grupo modifica las ponderaciones del índice.
+- La recomendación es sensible al énfasis extremo en crecimiento; E3.13 muestra
+  a Utah en cuarto lugar bajo ese escenario.

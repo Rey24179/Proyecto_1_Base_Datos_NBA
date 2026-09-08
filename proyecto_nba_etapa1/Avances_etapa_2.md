@@ -160,8 +160,12 @@ historial completo y satisface las llaves foráneas.
 
 - `News.csv` (772 MB) se excluye por tamaño y porque no aporta a ninguna de
   las preguntas del proyecto. Representa el 93% del peso del ZIP.
-- `Game_Inactive_Players.csv` y `Draft_Combine.csv` no se cargan en esta
-  etapa. *(Pendiente: cargar o justificar formalmente la exclusión.)*
+- `Game_Inactive_Players.csv` se excluye porque ninguna pregunta utiliza la
+  condición de inactividad por partido y cargarlo ampliaría el modelo sin
+  aportar a las métricas escogidas.
+- `Draft_Combine.csv` se excluye porque las medidas físicas del combine no
+  intervienen en el criterio de inversión; el análisis del draft usa selección
+  y producción NBA observada en 2020-21.
 
 ---
 
@@ -255,8 +259,7 @@ solo con promedios de carrera.
 
 ---
 
-## 7. Pendientes
+## 7. Trabajo opcional
 
-- Cargar `Game_Inactive_Players.csv` y `Draft_Combine.csv`
-- Ampliar `load_api.py` con reintentos y control de límite de peticiones, y
-  con un ciclo de temporadas hasta 2025-26 para los puntos extra.
+- Ampliar `load_api.py` con reintentos, control de límite de peticiones y un
+  ciclo hasta 2025-26 corresponde a puntos extra, no al alcance obligatorio.

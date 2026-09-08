@@ -84,8 +84,9 @@ incluyendo agrupaciones, joins y subconsultas.
 
 Para la Etapa 3 ejecute completo `database/stage3_queries.sql` en una misma
 sesión de pgAdmin. Contiene las 13 preguntas propias, el índice de inversión y
-el análisis de sensibilidad. Registre los resultados en
-`documentation/JUSTIFICACION_ETAPA_3.md` antes de redactar la conclusión.
+el análisis de sensibilidad. Los resultados ejecutados y su interpretación se
+encuentran en `documentation/Fase_3_queries.pdf` y
+`documentation/JUSTIFICACION_ETAPA_3.md`.
 
 ### 7. Ejecutar la ingesta de NBA API
 
@@ -95,6 +96,8 @@ python scripts/load_api.py --season 2020-21
 
 La información se guarda en `player_season_stat`. El script puede repetirse sin
 duplicar registros porque utiliza una actualización mediante `ON CONFLICT`.
+La carga también restaura los nombres completos de los equipos usando el
+catálogo incluido en `nba_api`, evitando que queden sustituidos por abreviaturas.
 
 La consulta 7 utiliza esta ingesta. Si el API no responde durante la
 demostración, documente el intento y conserve evidencia de una ejecución previa.
@@ -130,6 +133,8 @@ relaciones más importantes son:
 - `database/verification.sql`: controles de integridad y cobertura.
 - `database/analysis_queries.sql`: las 15 consultas requeridas.
 - `database/stage3_queries.sql`: análisis completo y recomendación de Etapa 3.
+- `documentation/Fase_3_queries.pdf`: evidencia de ejecución de las 13 consultas.
+- `documentation/JUSTIFICACION_ETAPA_3.md`: interpretación y recomendación.
 - `diagrams/er_diagram.png` y `diagrams/der_chen.png`: diagramas ER exportados.
 - PDF final con preguntas, SQL, resultados reales, problemas de calidad y
   justificación de la recomendación de inversión.
