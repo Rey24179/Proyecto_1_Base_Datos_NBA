@@ -39,18 +39,22 @@ Resultados e interpretación: PENDIENTE.
 
 ## 5. Preguntas propias
 
-Las consultas 9 a 14 analizan consistencia, mejora, eficiencia salarial,
-diferencial de puntos, crecimiento de nómina y talento All-Star.
+Las consultas E3.1 a E3.13 de `database/stage3_queries.sql` analizan
+consistencia, diferencial de puntos, ventaja local, eficiencia salarial,
+flexibilidad financiera, crecimiento, profundidad del roster, draft,
+dependencia y sensibilidad de la recomendación.
 
 Resultados e interpretación: PENDIENTE.
 
 ## 6. Recomendación de inversión
 
-La consulta 15 calcula un índice reproducible con estas ponderaciones:
+La consulta E3.12 calcula un índice reproducible con estas ponderaciones:
 
-- 45% porcentaje de victorias.
-- 35% diferencial promedio de puntos.
-- 20% victorias por millón de dólares de nómina.
+- 40% rendimiento.
+- 35% valor por el dinero.
+- 25% crecimiento.
+
+La consulta E3.13 comprueba la sensibilidad ante ponderaciones alternativas.
 
 Equipo recomendado según el resultado: PENDIENTE.
 
@@ -63,7 +67,9 @@ Justificación, riesgos y sensibilidad a las ponderaciones: PENDIENTE.
 3. Ejecutar `python scripts/load_csv.py --zip data/Data.zip`.
 4. Ejecutar `python scripts/load_api.py --season 2020-21`.
 5. Ejecutar `database/verification.sql`.
-6. Ejecutar `database/analysis_queries.sql` y exportar los resultados.
+6. Ejecutar `database/analysis_queries.sql` y exportar los resultados de Etapa 2.
+7. Ejecutar completo `database/stage3_queries.sql` en la misma sesión y exportar
+   los trece resultados de Etapa 3.
 
 ## 8. Limitaciones
 

@@ -82,6 +82,11 @@ Después ejecute `database/analysis_queries.sql`. Contiene las 8 preguntas
 obligatorias y 7 preguntas propias (15 consultas en total), incluyendo
 agrupaciones, joins y subconsultas.
 
+Para la Etapa 3 ejecute completo `database/stage3_queries.sql` en una misma
+sesión de pgAdmin. Contiene las 13 preguntas propias, el índice de inversión y
+el análisis de sensibilidad. Registre los resultados en
+`documentation/JUSTIFICACION_ETAPA_3.md` antes de redactar la conclusión.
+
 ### 7. Ejecutar la ingesta de NBA API
 
 ```powershell
@@ -124,6 +129,7 @@ relaciones más importantes son:
 - `scripts/load_api.py`: ingesta oficial del NBA API.
 - `database/verification.sql`: controles de integridad y cobertura.
 - `database/analysis_queries.sql`: las 15 consultas requeridas.
+- `database/stage3_queries.sql`: análisis completo y recomendación de Etapa 3.
 - `diagrams/er_diagram.png` y `diagrams/der_chen.png`: diagramas ER exportados.
 - PDF final con preguntas, SQL, resultados reales, problemas de calidad y
   justificación de la recomendación de inversión.
