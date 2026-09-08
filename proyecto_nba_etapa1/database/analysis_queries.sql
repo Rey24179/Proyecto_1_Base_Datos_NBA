@@ -224,7 +224,14 @@ GROUP BY e.estado
 ORDER BY salarios_totales DESC
 LIMIT 5;
 
--- Base reutilizada por las preguntas propias 9-13 y la recomendacion 15.
+/*
+Consultas exploratorias conservadas como trabajo preliminar.
+La implementacion oficial y completa de la Etapa 3 se encuentra en
+database/stage3_queries.sql (E3.1 a E3.13). Para la conclusion final deben
+utilizarse los resultados de ese archivo, no el indice preliminar siguiente.
+*/
+
+-- Base reutilizada por las consultas exploratorias 9-13 y 15.
 DROP VIEW IF EXISTS analysis_team_season;
 CREATE TEMP VIEW analysis_team_season AS
 WITH r AS (SELECT season_id,home_team_id team_id,(home_result='W')::int gano,home_points-away_points margen FROM game
@@ -266,7 +273,7 @@ SELECT t.full_name,COUNT(*) FILTER(WHERE p.all_star_appearances>0) jugadores_all
 FROM team t JOIN player p ON p.current_team_id=t.team_id WHERE p.is_active
 GROUP BY t.team_id,t.full_name ORDER BY jugadores_all_star DESC,apariciones DESC;
 
--- 15. Indice para invertir: 45% victorias, 35% margen, 20% eficiencia salarial.
+-- 15. Indice exploratorio anterior; sustituido por E3.12 y E3.13.
 WITH m AS (SELECT a.*,a.victorias/NULLIF(ts.total_salary/1000000.0,0) eficiencia
  FROM analysis_team_season a JOIN team_salary ts USING(season_id,team_id) WHERE a.season_id='2020-21'),
 n AS (SELECT m.*,PERCENT_RANK() OVER(ORDER BY pct) nv,PERCENT_RANK() OVER(ORDER BY margen) nm,

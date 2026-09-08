@@ -78,9 +78,9 @@ el esquema use `--no-reset` solamente cuando sea necesario.
 Abra `database/verification.sql` en pgAdmin y ejecute sus consultas. Las
 consultas de duplicados y registros huérfanos deben devolver cero filas.
 
-Después ejecute `database/analysis_queries.sql`. Contiene las 8 preguntas
-obligatorias y 7 preguntas propias (15 consultas en total), incluyendo
-agrupaciones, joins y subconsultas.
+Después ejecute `database/analysis_queries.sql` para las 8 preguntas
+obligatorias. El archivo conserva además algunas consultas exploratorias,
+incluyendo agrupaciones, joins y subconsultas.
 
 Para la Etapa 3 ejecute completo `database/stage3_queries.sql` en una misma
 sesión de pgAdmin. Contiene las 13 preguntas propias, el índice de inversión y
