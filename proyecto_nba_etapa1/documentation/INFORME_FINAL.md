@@ -14,7 +14,8 @@
 - Complemento: NBA API, tabla `player_season_stat`.
 - Datos excluidos: `News.csv`, por tamaño y falta de relación directa con las
   métricas escogidas. Esta decisión debe explicarse en la presentación.
-- Modelo ER: insertar aquí la exportación de `diagrams/modelo_er.md`.
+- Modelo ER: insertar `diagrams/er_diagram.png` o la versión con notación de
+  Chen disponible en `diagrams/der_chen.png`.
 
 ## 3. Calidad y transformación
 

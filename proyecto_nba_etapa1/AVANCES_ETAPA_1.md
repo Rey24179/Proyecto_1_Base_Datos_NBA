@@ -44,14 +44,20 @@ Las tablas principales son: `team`, `season`, `player`, `game`, `official`,
 `game_official`, `team_salary`, `player_salary`, `draft_selection`,
 `team_history` y `player_season_stat`.
 
-## Próxima evidencia a obtener
+## Evidencia obtenida
 
-- Ejecutar el esquema en PostgreSQL.
-- Cargar el ZIP mediante `load_csv.py`.
-- Ejecutar `verification.sql` y guardar capturas de los conteos.
-- Ejecutar `load_api.py` para una temporada y verificar la tabla
+- El esquema y la carga fueron ejecutados en PostgreSQL.
+- Los controles de `verification.sql` se documentaron sin duplicados ni
+  relaciones huérfanas.
+- La ingesta del NBA API para 2020-21 registró 540 estadísticas en
   `player_season_stat`.
-- Agregar el diagrama ER exportado como imagen al repositorio.
+- Los diagramas ER se exportaron como `diagrams/er_diagram.png` y
+  `diagrams/der_chen.png`.
+- Las capturas de verificaciones y consultas se encuentran en
+  `documentation/pruebas de queries.pdf`.
+
+El análisis final, la selección del equipo y la justificación de inversión
+permanecen pendientes.
 
 ## Auditoría contra el enunciado completo
 

@@ -96,8 +96,9 @@ demostración, documente el intento y conserve evidencia de una ejecución previ
 
 ## Modelo de datos
 
-El modelo completo se encuentra en `diagrams/modelo_er.md`. Las relaciones más
-importantes son:
+El modelo completo se encuentra en `diagrams/er_diagram.png`. También se
+incluye una versión con notación de Chen en `diagrams/der_chen.png`. Las
+relaciones más importantes son:
 
 - Una temporada contiene muchos partidos.
 - Cada partido tiene un equipo local y un equipo visitante.
@@ -123,7 +124,7 @@ importantes son:
 - `scripts/load_api.py`: ingesta oficial del NBA API.
 - `database/verification.sql`: controles de integridad y cobertura.
 - `database/analysis_queries.sql`: las 15 consultas requeridas.
-- `diagrams/modelo_er.md`: fuente del diagrama; expórtela a PNG o SVG.
+- `diagrams/er_diagram.png` y `diagrams/der_chen.png`: diagramas ER exportados.
 - PDF final con preguntas, SQL, resultados reales, problemas de calidad y
   justificación de la recomendación de inversión.
 
