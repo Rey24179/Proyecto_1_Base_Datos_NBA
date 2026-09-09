@@ -9,11 +9,11 @@
    Un equipo atractivo para invertir debe cumplir tres condiciones a la
    vez. Ninguna basta por sí sola:
 
-     1. RENDIMIENTO SOSTENIDO. Gana de forma consistente y con un piso
+     1. Rendimiento sostenido: Gana de forma consistente y con un piso
         alto, no por un pico aislado.
-     2. VALOR POR EL DINERO. Convierte nómina en victorias de forma
+     2. Valor por el dinero: Convierte nómina en victorias de forma
         eficiente y tiene margen financiero hacia adelante.
-     3. CRECIMIENTO. Su trayectoria apunta hacia arriba y tiene talento
+     3. Crecimiento: Su trayectoria apunta hacia arriba y tiene talento
         joven bajo contrato.
 
    Cada consulta responde a una de las tres dimensiones y alimenta el
@@ -48,17 +48,15 @@ GROUP BY season_id, team_id;
 
 
 /* ===================================================================
-   DIMENSIÓN 1 - RENDIMIENTO SOSTENIDO
-   =================================================================== */
+   Dimension 1 - Rendimiento sostenido
+   =================================================================== 
 
-/* E3.1 ¿Qué equipos ganan de forma consistente Y con un piso alto?
+   E3.1 ¿Qué equipos ganan de forma consistente Y con un piso alto?
 
    Ordenar solo por variabilidad premia a los equipos consistentemente
    malos: Sacramento tiene baja desviación estándar con 39.8% de
    victorias promedio. Por eso se exige un piso mínimo de 40% en la peor
    de las seis temporadas, y se ordena por rendimiento promedio.
-
-   Técnicas: JOIN, GROUP BY, HAVING, funciones de agregación.
 */
 SELECT t.abbreviation AS equipo,
        t.full_name,
@@ -81,7 +79,6 @@ ORDER BY pct_promedio DESC;
    suerte. Se compara ambas medidas para detectar equipos cuyo récord
    sobreestima o subestima su nivel real.
 
-   Técnicas: JOIN, GROUP BY, funciones ventana.
 */
 SELECT t.abbreviation AS equipo,
        ROUND(AVG(a.margen), 2) AS margen_promedio,
@@ -104,7 +101,6 @@ LIMIT 12;
    es ingreso directo. Un equipo con fuerte diferencial de local es más
    atractivo desde el punto de vista comercial.
 
-   Técnicas: CTE, agregación condicional, GROUP BY.
 */
 WITH local_visita AS (
     SELECT home_team_id AS team_id, 'local' AS condicion,
@@ -129,16 +125,15 @@ LIMIT 10;
 
 /* ===================================================================
    DIMENSIÓN 2 - VALOR POR EL DINERO
-   =================================================================== */
-
-/* E3.4 ¿Cuántas victorias compra cada millón de dólares?
+   =================================================================== 
+   
+   E3.4 ¿Cuántas victorias compra cada millón de dólares?
 
    Es la medida más directa de eficiencia del gasto. Un equipo que gana
    lo mismo con menos nómina tiene mejor gestión y más margen para
    mejorar sin desbordar el presupuesto.
-
-   Técnicas: JOIN de tres tablas, división con protección de nulos.
 */
+
 SELECT t.abbreviation AS equipo,
        t.full_name,
        a.victorias,
@@ -162,7 +157,6 @@ ORDER BY victorias_por_millon DESC;
    Se usa PIE porque all_star_appearances solo tiene dato para 3 de los
    523 jugadores con salario en 2020-21.
 
-   Técnicas: CTEs múltiples, funciones ventana, LEFT JOIN, subconsulta.
 */
 WITH gasto AS (
     SELECT ts.team_id,
@@ -200,7 +194,7 @@ LIMIT 12;
    el tope salarial. Un equipo bueno pero con la nómina comprometida al
    máximo tiene poco margen de maniobra.
 
-   Técnicas: agregación condicional, GROUP BY, protección de nulos.
+
 */
 SELECT t.abbreviation AS equipo,
        ROUND(MAX(ts.total_salary) FILTER (WHERE ts.season_id = '2020-21')
@@ -218,10 +212,10 @@ ORDER BY pct_comprometido;
 
 
 /* ===================================================================
-   DIMENSIÓN 3 - CRECIMIENTO Y TALENTO JOVEN
-   =================================================================== */
-
-/* E3.7 ¿Qué equipos vienen en trayectoria ascendente?
+   DIMENSIÓN 3 - Crecimiento
+   =================================================================== 
+   
+   E3.7 ¿Qué equipos vienen en trayectoria ascendente?
 
    Se usa la pendiente de una regresión lineal sobre las seis
    temporadas en lugar de comparar solo la primera contra la última.
@@ -229,7 +223,7 @@ ORDER BY pct_comprometido;
    de forma sostenida, y la diferencia solo se ve con la tendencia
    completa.
 
-   Técnicas: regresión lineal, GROUP BY, HAVING.
+
 */
 SELECT t.abbreviation AS equipo,
        t.full_name,
@@ -252,8 +246,6 @@ LIMIT 12;
    temporada, no con promedios de carrera. Cuenta anotadores de
    referencia y evalúa la rotación titular.
 
-   Técnicas: JOIN, agregación condicional, GROUP BY, filtro por
-   participación mínima.
 */
 SELECT t.abbreviation AS equipo,
        COUNT(*) FILTER (WHERE s.points_per_game >= 15) AS anotadores_15plus,
@@ -275,7 +267,6 @@ LIMIT 12;
    productivos de cada equipo. Un núcleo fuerte y balanceado sostiene
    el rendimiento mejor que una sola estrella.
 
-   Técnicas: CTE, ROW_NUMBER con PARTITION, JOIN, GROUP BY.
 */
 WITH ranking_jugadores AS (
     SELECT s.team_id,
@@ -306,11 +297,10 @@ LIMIT 12;
    menos que el fichado en agencia libre, así que un buen historial de
    draft es una ventaja financiera sostenida.
 
-   OJO: la tabla registra al equipo que hizo la selección, no al equipo
+   La tabla registra al equipo que hizo la selección, no al equipo
    donde el jugador terminó. Ejemplo: Luka Doncic aparece con Atlanta
    porque los Hawks lo eligieron y lo traspasaron esa misma noche.
 
-   Técnicas: JOIN de tres tablas, GROUP BY, filtros compuestos.
 */
 SELECT t.abbreviation AS equipo,
        COUNT(DISTINCT d.player_id) AS picks_productivos,
@@ -331,10 +321,10 @@ LIMIT 12;
 /* E3.11 ¿Qué equipos dependen demasiado de un solo jugador?
 
    Un equipo cuya producción se concentra en una sola figura es más
-   frágil: una lesión hunde la temporada. Se calcula qué porcentaje de
+   frágil. Se calcula qué porcentaje de
    los puntos del núcleo aporta el mejor anotador.
 
-   Técnicas: CTE, subconsulta, funciones ventana, GROUP BY.
+
 */
 WITH produccion AS (
     SELECT s.team_id,
@@ -356,10 +346,10 @@ LIMIT 12;
 
 
 /* ===================================================================
-   E3.12 - ÍNDICE COMPUESTO DE INVERSIÓN
-   =================================================================== */
-
-/* Consolida las tres dimensiones en un solo puntaje comparable.
+   E3.12 - Indice compuesto de inversion
+   =================================================================== 
+   
+   Consolida las tres dimensiones en un solo puntaje comparable.
 
    Cada métrica se normaliza con PERCENT_RANK, que convierte valores en
    posiciones relativas entre 0 y 1. Sin esa normalización no se pueden
@@ -374,7 +364,6 @@ LIMIT 12;
      25% CRECIMIENTO  - trayectoria; se invierte para el futuro, no
                         para el pasado.
 
-   Técnicas: CTEs múltiples, funciones ventana, regresión, JOIN.
 */
 WITH historico AS (
     SELECT a.team_id,
@@ -425,13 +414,11 @@ ORDER BY indice_inversion DESC;
 
 
 /* ===================================================================
-   E3.13 - ANÁLISIS DE SENSIBILIDAD
+   E3.13 - Analisis de sensibilidad
 
    ¿La recomendación depende de las ponderaciones elegidas? Se comparan
    tres esquemas distintos. Si el mismo equipo encabeza los tres, la
    conclusión es robusta y no un artefacto de los pesos.
-
-   Técnicas: CTE, funciones ventana, comparación de rankings.
    =================================================================== */
 WITH historico AS (
     SELECT a.team_id, AVG(a.pct) AS pct_promedio, MIN(a.pct) AS piso,
